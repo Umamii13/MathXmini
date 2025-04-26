@@ -11,4 +11,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MenuScene.unity
     guid: bac66ef8e2cdf2143890dee9c3f99c82
+  - enabled: 1
+    path: Assets/Scenes/CalculateXScene.unity
+    guid: 6f031e489da6a79489d9a0a6cf00fa8f
+  - enabled: 1
+    path: Assets/Scenes/SymboXScene.unity
+    guid: d67eb199d8e79fa49aeeb85f5f2db482
   m_configObjects: {}
