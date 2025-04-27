@@ -14,7 +14,7 @@ public class CalculateGamemanager : MonoBehaviour
     
     [Header("System")]
     public string question;
-    public int trueanswer; 
+    public float trueanswer; 
     public int score;
 
     public float gametime;
@@ -24,8 +24,8 @@ public class CalculateGamemanager : MonoBehaviour
         gameStart = true;
         RandomQuestion();
         choice[0].choiceButton.onClick.AddListener(() => { CheckAnswer(choice[0].answer); });
-        choice[1].choiceButton.onClick.AddListener(() => { CheckAnswer(choice[3].answer); });
-        choice[2].choiceButton.onClick.AddListener(() => { CheckAnswer(choice[3].answer); });
+        choice[1].choiceButton.onClick.AddListener(() => { CheckAnswer(choice[1].answer); });
+        choice[2].choiceButton.onClick.AddListener(() => { CheckAnswer(choice[2].answer); });
         choice[3].choiceButton.onClick.AddListener(() => { CheckAnswer(choice[3].answer); });
 
 
@@ -86,26 +86,28 @@ public class CalculateGamemanager : MonoBehaviour
             else
             {
                 question = num1 + " / " + num2 + " =";
-                trueanswer = num1 / num2;
+                trueanswer = (float)num1 / num2;
                 questionText.text = question;
             }
             RandomChoice();
-        }
-        while (trueanswer % 1 != 0);
 
+        }
+
+        while (trueanswer % 1 != 0 || trueanswer > 500);
+        
     }
 
     public void RandomChoice()
     {
         int truechoicepos = UnityEngine.Random.Range(0, choice.Length);
         print(truechoicepos);
-        choice[truechoicepos].answer = trueanswer;
+        choice[truechoicepos].answer = Convert.ToInt32( trueanswer);
         
         for (int i = 0; i < choice.Length; i++)
         {
             if (choice[i].answer == trueanswer)
             {
-                choice[i].answer = trueanswer;
+                choice[i].answer = Convert.ToInt32(trueanswer);
                 choice[i].choicetext.text = choice[i].answer.ToString();
             }
             else
@@ -114,7 +116,7 @@ public class CalculateGamemanager : MonoBehaviour
                 do
                 {
                     print("new");
-                     ran = UnityEngine.Random.Range(trueanswer - 100, trueanswer + 100);
+                     ran = UnityEngine.Random.Range(Convert.ToInt32(trueanswer) - 100, Convert.ToInt32(trueanswer) + 100);
                 }
                 while(ran == trueanswer);
 
@@ -144,11 +146,13 @@ public class CalculateGamemanager : MonoBehaviour
         Debug.Log("1");
         if(answer == trueanswer)
         {
+            AudiosourceManager.instance.PlayCorrectSE();
             score += 1;
             RandomQuestion();
         }
         else
         {
+            AudiosourceManager.instance.PlayFailSE();
             RandomQuestion();
         }
         scoreText.text = score.ToString("D5");
