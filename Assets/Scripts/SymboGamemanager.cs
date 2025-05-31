@@ -3,16 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 
 public class SymboGamemanager : MonoBehaviour
 {
     public TextMeshProUGUI questionText;
     public TextMeshProUGUI scoreText;
-    int TimeMin;
-    int TimeSec;
     public TextMeshProUGUI Timetext;
     public choicebtn[] choice;
+
+    public Animator gameendpanel;
+    public Animator clock;
+    public TextMeshProUGUI scoretext;
 
     public float gametime;
     public bool gameStart;
@@ -21,11 +22,29 @@ public class SymboGamemanager : MonoBehaviour
 
     [Header("System")]
     public string question;
+    public float maxanswer;
+    public float minanswer;
     public float resualt;
     public int trueanswer;
     void Start()
     {
         gameStart = true;
+        string mode = PlayerPrefs.GetString("Mode");
+       if(mode == "Easy")
+       {
+           maxanswer = 50;
+           minanswer = 0;
+       }
+       else if (mode == "Normal")
+       {
+           maxanswer = 100;
+           minanswer = -100;
+       }
+       else if (mode == "Hard")
+       {
+           maxanswer = 150;
+           minanswer = -150;
+       }
         RandomQuestion();
         choice[0].choiceButton.onClick.AddListener(() => { CheckAnswer(choice[0].answer); });
         choice[1].choiceButton.onClick.AddListener(() => { CheckAnswer(choice[1].answer); });
@@ -41,8 +60,8 @@ public class SymboGamemanager : MonoBehaviour
             gametime -= 1 * Time.deltaTime;
             float TimetextMin = (gametime / 60);
             float TimetextSec = (gametime % 60);
-            TimeMin = Convert.ToInt32(TimetextMin);
-            TimeSec = Convert.ToInt32(TimetextSec);
+            int TimeMin = (int)TimetextMin;
+            int TimeSec = (int)TimetextSec;
             Timetext.text = TimeMin.ToString("D2") + " : " + TimeSec.ToString("D2");
             if (gametime <= 0)
             {
@@ -52,6 +71,9 @@ public class SymboGamemanager : MonoBehaviour
                     PlayerPrefs.SetInt("SymboXhighscore", score);
                 }
                 //game over panel
+                gameendpanel.gameObject.SetActive(true);
+                scoretext.text = score.ToString("D6");
+                gameendpanel.SetTrigger("In");
                 gameStart = false;
             }
         }
@@ -86,6 +108,12 @@ public class SymboGamemanager : MonoBehaviour
             }
             else
             {
+                if (num2 == 0)
+                {
+                    RandomQuestion();
+                    print("0");
+                    return;
+                }
                 question = num1 + " _ " + num2 + " =" + Convert.ToInt32(num1 / num2);
                 resualt = (float)num1 / num2;
                 questionText.text = question;
@@ -93,7 +121,7 @@ public class SymboGamemanager : MonoBehaviour
             trueanswer = symbo;
         }
 
-        while (resualt % 1 != 0 || resualt > 500);
+        while (resualt % 1 != 0 || resualt > maxanswer || resualt < minanswer);
     }
 
     public void CheckAnswer(int selectchoice)
@@ -107,8 +135,16 @@ public class SymboGamemanager : MonoBehaviour
         else
         {
             AudiosourceManager.instance.PlayCorrectSE();
+            if (score > 0)
+            {
+                score -= 1;
+            }
+            else
+            {
+                gametime -= 5;
+            }
             RandomQuestion();
         }
-        scoreText.text = score.ToString("D5");
+        scoreText.text = score.ToString("D6");
     }
 }

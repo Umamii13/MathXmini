@@ -1,5 +1,6 @@
 using System;
 using TMPro;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,13 +8,17 @@ public class CalculateGamemanager : MonoBehaviour
 {
     public TextMeshProUGUI questionText;
     public TextMeshProUGUI scoreText;
-    int TimeMin;
-    int TimeSec;
     public TextMeshProUGUI Timetext;
     public choicebtn[] choice;
+
+    public Animator gameendpanel;
+    public Animator clock;
+    public TextMeshProUGUI scoretext;
     
     [Header("System")]
     public string question;
+    public float maxanswer;
+    public float minanswer;
     public float trueanswer; 
     public int score;
 
@@ -22,6 +27,22 @@ public class CalculateGamemanager : MonoBehaviour
     void Start()
     {
         gameStart = true;
+        string mode = PlayerPrefs.GetString("Mode");
+        if(mode == "Easy")
+        {
+            maxanswer = 50;
+            minanswer = 0;
+        }
+        else if (mode == "Normal")
+        {
+            maxanswer = 100;
+            minanswer = -100;
+        }
+        else if (mode == "Hard")
+        {
+            maxanswer = 150;
+            minanswer = -150;
+        }
         RandomQuestion();
         choice[0].choiceButton.onClick.AddListener(() => { CheckAnswer(choice[0].answer); });
         choice[1].choiceButton.onClick.AddListener(() => { CheckAnswer(choice[1].answer); });
@@ -39,8 +60,8 @@ public class CalculateGamemanager : MonoBehaviour
             gametime -= 1 * Time.deltaTime;
             float TimetextMin = (gametime / 60);
             float TimetextSec = (gametime % 60);
-            TimeMin = Convert.ToInt32(TimetextMin);
-            TimeSec = Convert.ToInt32(TimetextSec);
+            int TimeMin = (int)TimetextMin;
+            int TimeSec = (int)TimetextSec;
             Timetext.text = TimeMin.ToString("D2") + " : " + TimeSec.ToString("D2");
 
             if (gametime <= 0)
@@ -51,6 +72,9 @@ public class CalculateGamemanager : MonoBehaviour
                     PlayerPrefs.SetInt("CalculateXhighscore", score);
                 }
                 //game over panel
+                gameendpanel.gameObject.SetActive(true);
+                scoretext.text = score.ToString("D6");
+                gameendpanel.SetTrigger("In");
                 gameStart = false;
             }
         }
@@ -85,6 +109,12 @@ public class CalculateGamemanager : MonoBehaviour
             }
             else
             {
+                if(num2 == 0)
+                {
+                    RandomQuestion();
+                    print("0");
+                    return;
+                }
                 question = num1 + " / " + num2 + " =";
                 trueanswer = (float)num1 / num2;
                 questionText.text = question;
@@ -93,7 +123,7 @@ public class CalculateGamemanager : MonoBehaviour
 
         }
 
-        while (trueanswer % 1 != 0 || trueanswer > 500);
+        while (trueanswer % 1 != 0 || trueanswer > maxanswer || trueanswer < minanswer );
         
     }
 
@@ -101,7 +131,7 @@ public class CalculateGamemanager : MonoBehaviour
     {
         int truechoicepos = UnityEngine.Random.Range(0, choice.Length);
         print(truechoicepos);
-        choice[truechoicepos].answer = Convert.ToInt32( trueanswer);
+        choice[truechoicepos].answer = Convert.ToInt32(trueanswer);
         
         for (int i = 0; i < choice.Length; i++)
         {
@@ -116,7 +146,7 @@ public class CalculateGamemanager : MonoBehaviour
                 do
                 {
                     print("new");
-                     ran = UnityEngine.Random.Range(Convert.ToInt32(trueanswer) - 100, Convert.ToInt32(trueanswer) + 100);
+                     ran = UnityEngine.Random.Range(Convert.ToInt32(trueanswer) - (int)maxanswer, Convert.ToInt32(trueanswer) + (int)maxanswer);
                 }
                 while(ran == trueanswer);
 
@@ -126,7 +156,7 @@ public class CalculateGamemanager : MonoBehaviour
                     do
                     {
                         print ("new2");
-                        neww = UnityEngine.Random.Range(choice[(i - 1)].answer - 100, choice[(i - 1)].answer + 100);
+                        neww = UnityEngine.Random.Range(choice[(i - 1)].answer - (int)maxanswer, choice[(i - 1)].answer + (int)maxanswer);
 
                     }
                     while (neww == trueanswer);
@@ -153,9 +183,17 @@ public class CalculateGamemanager : MonoBehaviour
         else
         {
             AudiosourceManager.instance.PlayFailSE();
+            if(score > 0)
+            {
+                score -= 1;
+            }
+            else
+            {
+                gametime -= 5;
+            }
             RandomQuestion();
         }
-        scoreText.text = score.ToString("D5");
+        scoreText.text = score.ToString("D6");
     }
 }
 

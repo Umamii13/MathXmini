@@ -7,7 +7,7 @@ public class AudiosourceManager : MonoBehaviour
     public static AudiosourceManager instance { get; private set; }
 
     public AudioSource EffectAudio;
-
+    public AudioSource musicAudio;
     public AudioClip correctEffect;
     public AudioClip failEffect;
     public AudioClip ClickEffect;
@@ -21,7 +21,7 @@ public class AudiosourceManager : MonoBehaviour
         }
         else
         {
-            Destroy(instance);
+            Destroy(gameObject);
             
         }
         

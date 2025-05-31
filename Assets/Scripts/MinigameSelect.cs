@@ -28,6 +28,10 @@ public class MinigameSelect : MonoBehaviour
     public void beforeminigame()
     {
         currentminigame -= 1;
+        if (currentminigame < 0)
+        {
+            currentminigame = -(currentminigame);
+        }
         currentminigame = currentminigame % minigame.Length;
         UpdateMinigame();
 
